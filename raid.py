@@ -17,6 +17,7 @@ dbcursor = dbconn.cursor()
 raid_in_action = False
 FILE_NAME_RAID = 'raid_power_file.txt'
 FILE_NAME_STATUS = 'raid_status.txt'
+diffrent_text = 1
 
 
 def retrieve_file_data(file_name):
@@ -96,7 +97,17 @@ def raid_attack():
 
     elif piret_draw > player_draw:
         print ('Pirets win')
-        api.update_status('#Ayanabot Sadly the attackers were successful and killed everyone and did steal most of the power we had')
+        if diffrent_text == 0:
+            api.update_status('#Ayanabot Sadly the attackers were successful and killed everyone and did steal most of the power we had')
+            diffrent_text = diffrent_text + 1
+        elif diffrent_text == 1:
+            api.update_status('#Ayanabot Mission fail let\'s get them next time')
+            diffrent_text = 2
+        elif diffrent_text == 2:
+            api.update_status('#Ayanabot THEY TOOK ARE POWER AND KILLED US ALL' )
+            diffrent_text = 0
+        
+
     
     elif piret_draw == player_draw:
         print('draw')
