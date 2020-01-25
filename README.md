@@ -19,7 +19,7 @@ Being connected simply mean that you have been using #Ayanabot atleast once
 ## Plans for futer
 * ~~Finish raid system~~ (Beta)
     * make so you get more power if "help" out more
-* Make *attack* to be more fair  
+* Make ***attack*** to be more fair  
 * Add bot/minigame to own twitter acc instead of using my private acc
 * Make more ways to gain power
 * *Add slot* ?? 
