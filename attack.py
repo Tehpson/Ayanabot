@@ -13,6 +13,23 @@ api = connect.twitter_conn()
 dbconn = connect.conndb()
 dbcursor = dbconn.cursor()
 
+def attack_check(mention):
+    namearray = []
+    count = 0
+    for name in mention.full_text.lower().split(): 
+        if name.startswith('@'):
+            namearray.append(name)
+            count = count + 1
+    if count == 2:
+        attack_setup(mention,namearray)
+    elif count == 1:
+        api.update_status('@' + mention.user.screen_name + '#Ayanabot You need to enter a victum', mention.id)
+    elif count >2:
+        api.update_status('@' + mention.user.screen_name + '#Ayanabot you can only attack one at the time', mention.id)
+
+
+
+
 def attack_setup(mention, namearray):
     if namearray[0] == "@tehpson":
         opponent = namearray[1]
@@ -27,7 +44,7 @@ def attack_setup(mention, namearray):
     dbcursor.fetchall()
     if dbcursor.rowcount < 1:
         print("-->opponent dosent exist")
-        api.update_status('@' + mention.user.screen_name + '#Ayanabot : ' +opponent+' have never enter the game', mention.id)
+        api.update_status('@' + mention.user.screen_name + '#Ayanabot ' +opponent+' have never enter the game', mention.id)
     else:
         print("-->opponent is in database")
 
@@ -55,7 +72,7 @@ def attack_action(opponent_ID,attacker_ID,opponent_power,attacker_power,opponent
     attacker_darw = random.randrange(0,int(attacker_power),1)
     print(opponent_darw)
     print(attacker_darw)
-    if opponent_darw - attacker_darw > 0:
+    if opponent_darw > attacker_darw :
         #opponent win
         win_with = opponent_darw - attacker_darw
         opponent_new_power = int(attacker_power)/2 + int(opponent_darw)
@@ -64,14 +81,14 @@ def attack_action(opponent_ID,attacker_ID,opponent_power,attacker_power,opponent
         api.update_status('#Ayanabot :'+ opponent_name +' You won with '+ str(win_with)+' trops and you power is now at '+str(opponent_new_power), mention.id)
 
 
-    elif attacker_darw - opponent_darw > 0:
+    elif opponent_darw < attacker_darw :
         #attacker win
         win_with = attacker_darw - opponent_darw
         attacker_new_power = int(opponent_darw)/2 + int(attacker_power)
         opponent_new_power = int(opponent_darw)/2
         api.update_status('#Ayanabot :@' + mention.user.screen_name + ' You won with '+ str(win_with)+' trops and you power is now at ' +str(attacker_new_power), mention.id)
         api.update_status('#Ayanabot :'+ opponent_name +' You lost with '+ str(win_with)+' trops and you power is now at '+str(opponent_new_power), mention.id)
-    elif opponent_darw - attacker_darw  == 0:
+    elif opponent_darw == attacker_darw:
         #draw
         opponent_new_power = int(opponent_darw)/4*3
         attacker_new_power = int(attacker_power)/4*3
