@@ -13,7 +13,8 @@ parser.read('dev.ini')
 api = connect.twitter_conn()
 dbconn = connect.conndb()
 dbcursor = dbconn.cursor()
-FILE_NAME = 'last_seen_id.txt'
+FILE_LAST_SEEN = 'last_seen_id.txt'
+FILE_RAID_STATUS = 'raid_status.txt'
 
 
 
@@ -22,20 +23,58 @@ print("connection with database establish")
 
 
 
-def retrieve_last_seen_id(file_name):
+def retrieve_filedata(file_name):
     f_read = open(file_name, 'r')
-    last_seen_id = int(f_read.read().strip())
+    data = str(f_read.read().strip())
     f_read.close()
-    return last_seen_id
+    return data
 
-def store_last_seen_id(last_seen_id, file_name):
+def store_filedata(data, file_name):
     f_write = open(file_name, 'w')
-    f_write.write(str(last_seen_id))
+    f_write.write(str(data))
     f_write.close()
     return
 
+def raid_status():
+    return str(retrieve_filedata(FILE_RAID_STATUS))
 
 
+def raid_check(mention):
+    if 'Next raid' in raid_status():
+        api.update_status('@' + mention.user.screen_name +'#Ayanabot no current raid active please come back later', mention.id)
+    else:
+        text = mention.full_text.lower()
+        numberarray = [int(s) for s in text.split() if s.isdigit()]
+        if len(numberarray) > 1:
+            api.update_status('@' + mention.user.screen_name +'#Ayanabot Error please only enter one value', mention.id)
+            print('#Ayanabot Error please only enter one value')
+        elif len(numberarray) == 0:
+            api.update_status ('@' + mention.user.screen_name +'#Ayanabot Error you need to enter how power you want to add to the raid', mention.id)
+            print('#Ayanabot Error you need to enter how power you want to add to the raid')
+        elif len(numberarray) == 1:
+            input_power = numberarray[0]
+            twitter_ID = str(mention.user.id)
+            sql= "SELECT power FROM twitteruser WHERE twitter_ID = '"+twitter_ID+"'"
+            dbcursor.execute(sql)
+            result = dbcursor.fetchone()
+            for current_power in result:
+                if current_power < input_power:
+                    api.update_status('@' + mention.user.screen_name +'#Ayanabot  ERROR not enough Power', mention.id)
+                    print('#Ayanabot  ERROR not enough Power')
+                else:
+                    api.update_status('@' + mention.user.screen_name +'#Ayanabot '+str(input_power)+' Power have been placed to deffend against tha attacker', mention.id)
+                    print('#Ayanabot '+str(input_power)+' Power have been placed to deffend against tha attacker')
+                    new_power = int(current_power) - input_power
+
+                    sql = "UPDATE twitteruser SET power = '"+str(new_power)+"' WHERE twitter_ID = '"+twitter_ID+"'"
+                    dbcursor.execute(sql)
+                    dbconn.commit()
+                    print ("-->new power is "+str(new_power))
+
+                    sql = "INSERT INTO raid (twitter_id, attack_power) VALUES (%s,%s)"
+                    val = (twitter_ID, str(input_power))
+                    dbcursor.execute(sql,val)
+                    dbconn.commit()
 
 
 def check_databese_for_user(mention):
@@ -81,7 +120,7 @@ def hello_phase(mention):
     if mention.user.screen_name == 'tehpson':
         print("-->Not Responding... (reason: Not responing to myself)")
     else: 
-        api.update_status('#Ayanabot : Hello @' + mention.user.screen_name, mention.id)
+        api.update_status('#Ayanabot Hello @' + mention.user.screen_name, mention.id)
         print ("-->Responding...")
     add_power(str(mention.user.id),'power_a_hello')
 
@@ -95,9 +134,8 @@ def check_power(mention):
     result = dbcursor.fetchone()
     for current_powerpower in result:
         power = str(current_powerpower)
-    api.update_status('@' + mention.user.screen_name + '#Ayanabot : You have '+ power +' power', mention.id)
+    api.update_status('@' + mention.user.screen_name + '#Ayanabot You have '+ power +' power', mention.id)
     print ("-->Responding...")
-
 
 
 
@@ -105,7 +143,7 @@ def check_power(mention):
 #-----main----
 def main_code():
     
-    last_seen_id = retrieve_last_seen_id(FILE_NAME)
+    last_seen_id = int(retrieve_filedata(FILE_LAST_SEEN))
 
     print('\n')
     print('checking for uppdate')
@@ -115,27 +153,24 @@ def main_code():
         print('---------')
         print(str(mention.id) + ' - ' + str(mention.user.id) + ' - ' + mention.user.screen_name + ': ' + mention.full_text, flush=True)
         last_seen_id = mention.id
-        store_last_seen_id(last_seen_id, FILE_NAME)
+        store_filedata(last_seen_id, FILE_LAST_SEEN)
         if '#ayanabot' in mention.full_text.lower():
             print('-->#Ayanabot found')
             check_databese_for_user(mention)
-            if 'hello' in mention.full_text.lower() or 'hi' in mention.full_text.lower():
+            if 'hello ' in mention.full_text.lower() or 'hi' in mention.full_text.lower():
                 hello_phase(mention)
+
             if '!power' in mention.full_text.lower():
                 check_power(mention)
+            if '!raid ' in mention.full_text.lower():
+                raid_check(mention)
+
             if '!attack' in mention.full_text.lower():
-                namearray = []
-                count = 0
-                for name in mention.full_text.lower().split(): 
-                    if name.startswith('@'):
-                        namearray.append(name)
-                        count = count + 1
-                if count == 2:
-                    attack.attack_setup(mention,namearray)
-                elif count == 1:
-                    api.update_status('@' + mention.user.screen_name + '#Ayanabot : You need to enter a victum', mention.id)
-                elif count >2:
-                    api.update_status('@' + mention.user.screen_name + '#Ayanabot : you can only attack one at the time', mention.id)
+                attack.attack_check(mention)
+
+            if '!raidstatus' in mention.full_text.lower():
+                api.update_status('@' + mention.user.screen_name +' '+ raid_status(), mention.id)
+                print ("-->Responding...")
 
         print('---------')
 
