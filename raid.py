@@ -19,7 +19,6 @@ FILE_NAME_RAID = 'raid_power_file.txt'
 FILE_NAME_STATUS = 'raid_status.txt'
 diffrent_text = 1
 
-
 def retrieve_file_data(file_name):
     f_read = open(file_name, 'r')
     raid_power = str(f_read.read().strip())
@@ -106,8 +105,6 @@ def raid_attack():
         elif diffrent_text == 2:
             api.update_status('#Ayanabot THEY TOOK ARE POWER AND KILLED US ALL' )
             diffrent_text = 0
-        
-
     
     elif piret_draw == player_draw:
         print('draw')
