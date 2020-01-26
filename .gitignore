@@ -1,3 +1,6 @@
 dev.ini
+<<<<<<< HEAD
 *.txt
 __pycache__/
+=======
+>>>>>>> parent of ed73de3... Fixed  dubplicated message
