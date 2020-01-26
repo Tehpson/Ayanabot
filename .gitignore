@@ -1,5 +1,3 @@
 dev.ini
-raid_power_file.txt
-last_seen_id.txt
-raid_status.txt
+*.txt
 __pycache__/
