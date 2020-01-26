@@ -5,6 +5,7 @@ from configparser import ConfigParser
 import ctypes
 import connect
 import attack
+import slot
 
 ctypes.windll.kernel32.SetConsoleTitleW("Main")
 
@@ -171,6 +172,8 @@ def main_code():
             if '!raidstatus' in mention.full_text.lower():
                 api.update_status('@' + mention.user.screen_name +' '+ raid_status(), mention.id)
                 print ("-->Responding...")
+            if '!slot' in mention.full_text.lower():
+                slot.check(mention)
 
         print('---------')
 
