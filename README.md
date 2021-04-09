@@ -33,4 +33,4 @@ Being connected simply mean that you have been using #Ayanabot atleast once
 
 ### Contact
 Discord: Tehpson #5410  
-Twitter: [twitter.com/tehpson](twitter.com/tehpson) 
+
