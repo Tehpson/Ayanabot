@@ -1,6 +1,6 @@
 # Ayanabot
 
-This twitter bot is made for some minigames Atm runing from [@tehpson](https://twitter.com/tehpson) on twitter
+Twitter bot is shut down but feel free to clone this and make it your own
 
 In this program I am using the [tweepy API](https://www.tweepy.org/) 
 
